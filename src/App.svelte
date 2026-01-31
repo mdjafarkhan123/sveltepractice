@@ -2,6 +2,7 @@
 	import { v4 as uuid } from 'uuid';
 	import svelteLogo from './assets/svelte.svg';
 	import Todo from './lib/Todo.svelte';
+	let status = ['Completed', 'Pending'];
 	let todos = [
 		{
 			id: uuid(),
@@ -25,9 +26,17 @@
 		}
 	];
 
-	$: console.log(todos);
+	function handleTodo(e) {
+		e.preventDefault();
+		todos = [...todos, { id: uuid(), title: e.detail.task, status: 'Progress' }];
+	}
+	function handleRemove(e) {
+		todos = todos.filter((item) => {
+			return item.id !== e.detail.id;
+		});
+	}
 </script>
 
 <img src={svelteLogo} alt="svelte logo" width="100" height="100" />
-<Todo bind:todos></Todo>
+<Todo {todos} on:addtodo={handleTodo} on:removeTodo={handleRemove}></Todo>
 <div>Your remaining todos: {todos.length}</div>

@@ -1,25 +1,33 @@
 <script>
+	import { createEventDispatcher } from 'svelte';
 	import Button from './Button.svelte';
 	import { v4 as uuid } from 'uuid';
 
 	export let todos = [];
-	let taskInput = '';
-	const status = ['Completed', 'Progress', 'Pending'];
-	function handleTodo() {
-		if (!taskInput) {
-			return;
+	let inputValue = '';
+	const dispatch = createEventDispatcher();
+	function hadnleSubmit() {
+		const isNotCanceled = dispatch(
+			'addtodo',
+			{
+				task: inputValue
+			},
+			{ cancelable: true }
+		);
+		if (!isNotCanceled) {
+			inputValue = '';
 		}
-		todos = [...todos, { id: uuid(), title: taskInput, status: status[2] }];
-		taskInput = '';
 	}
-	function deleteTodo() {}
+
+	function handleRemove(id) {
+		dispatch('removeTodo', { id });
+	}
 </script>
 
 <div class="todo">
-	<h2>Your To Do</h2>
-	<form action="" class="todo__form" on:submit|preventDefault={handleTodo}>
-		<input type="text" name="todoInput" id="todoInput" bind:value={taskInput} />
-		<Button type="submit" disabled={!taskInput}>
+	<form action="" class="todo__form" on:submit|preventDefault={hadnleSubmit}>
+		<input type="text" name="todoInput" id="todoInput" bind:value={inputValue} />
+		<Button type="submit" disabled={!inputValue}>
 			<span slot="content">Add</span>
 		</Button>
 	</form>
@@ -27,10 +35,20 @@
 		{#each todos as item}
 			<div class="todo__item">
 				<label for={item.title}>
-					<input type="checkbox" name={item.title} id={item.title} />
+					<input
+						type="checkbox"
+						name={item.title}
+						id={item.title}
+						checked={item.status == 'Completed' ? true : false}
+					/>
 					{item.title}
 				</label>
-				<Button size="sm">
+				<Button
+					size="sm"
+					on:click={() => {
+						handleRemove(item.id);
+					}}
+				>
 					<span slot="content">❌</span>
 				</Button>
 			</div>
